@@ -65,6 +65,16 @@ export function ResultsPanel({
           <div className="stat-value">{result.totalEtaDays.toFixed(1)}</div>
         </div>
         <div className="stat">
+          <div className="stat-label">Avg SOG</div>
+          <div className="stat-value">{result.averageSogKnots.toFixed(1)} kn</div>
+        </div>
+        <div className="stat">
+          <div className="stat-label">Weather Delay</div>
+          <div className={`stat-value ${result.weatherDelayHours > 12 ? 'danger' : 'safe'}`}>
+            {result.weatherDelayHours.toFixed(0)} hrs
+          </div>
+        </div>
+        <div className="stat">
           <div className="stat-label">Max Beaufort</div>
           <div className={`stat-value ${result.maxBeaufort >= 6 ? 'danger' : 'safe'}`}>
             BF {result.maxBeaufort}
@@ -95,6 +105,11 @@ export function ResultsPanel({
           <span>Total Bunker</span>
           <span>{formatMt(result.totalFuelMT)}</span>
           <span>{formatUsd(totalBunkerCost)}</span>
+        </div>
+        <div className="fuel-row">
+          <span>Weather Extra Fuel</span>
+          <span>{formatMt(result.weatherExtraFuelMT)}</span>
+          <span className="danger">{formatUsd(result.weatherCostImpactUSD)}</span>
         </div>
       </div>
 
@@ -139,12 +154,20 @@ export function ResultsPanel({
         </strong>
       </div>
       <div className="mini-metric">
+        <span>Fuel Cost</span>
+        <strong>{formatUsd(result.fuelCostUSD)}</strong>
+      </div>
+      <div className="mini-metric">
         <span>CO2 Exposure</span>
         <strong>{Math.round(result.totalCo2EmissionsMT).toLocaleString('en-US')} MT</strong>
       </div>
       <div className="mini-metric">
         <span>CO2 Cost</span>
         <strong>{formatUsd(result.co2CostUSD)}</strong>
+      </div>
+      <div className="mini-metric">
+        <span>Canal / Fixed Dues</span>
+        <strong>{formatUsd(result.canalDuesUSD)}</strong>
       </div>
 
       <div className="section-divider" />
@@ -158,8 +181,14 @@ export function ResultsPanel({
         </div>
         <div className="insight-subtext">
           Speed loss {worstLeg.speedLossPercent.toFixed(1)}% | Wave{' '}
-          {worstLeg.weather.waveHeightMeters.toFixed(1)} m | Fuel on leg{' '}
+          {worstLeg.weather.waveHeightMeters.toFixed(1)} m | Current{' '}
+          {worstLeg.currentComponentKnots >= 0 ? '+' : ''}
+          {worstLeg.currentComponentKnots.toFixed(1)} kn | Fuel on leg{' '}
           {worstLeg.fuelConsumptionMT.toFixed(1)} MT
+        </div>
+        <div className="insight-subtext">
+          Data source: {worstLeg.weather.dataSource} | Risk score{' '}
+          {worstLeg.riskScore}/100 | Wave penalty {worstLeg.wavePenaltyKnots.toFixed(1)} kn
         </div>
       </div>
 

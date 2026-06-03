@@ -1,8 +1,10 @@
-import type { VesselInputs } from '../../types'
+import type { VesselInputs, WeatherMode } from '../../types'
 
 interface VesselInputPanelProps {
   inputs: VesselInputs
+  weatherMode: WeatherMode
   onChange: (inputs: VesselInputs) => void
+  onWeatherModeChange: (mode: WeatherMode) => void
   onCalculate: () => void
   isLoading: boolean
 }
@@ -13,7 +15,9 @@ function numberOrFallback(value: number, fallback: number): number {
 
 export function VesselInputPanel({
   inputs,
+  weatherMode,
   onChange,
+  onWeatherModeChange,
   onCalculate,
   isLoading,
 }: VesselInputPanelProps) {
@@ -38,6 +42,20 @@ export function VesselInputPanel({
         >
           <option value="route1">Rotterdam to Singapore (Cape)</option>
           <option value="route2">Rotterdam to Singapore (Suez)</option>
+        </select>
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="weather-mode">Weather Data Mode</label>
+        <select
+          id="weather-mode"
+          value={weatherMode}
+          onChange={(event) =>
+            onWeatherModeChange(event.target.value as WeatherMode)
+          }
+        >
+          <option value="simulated">Demo forecast corridor</option>
+          <option value="live">Live Open-Meteo API</option>
         </select>
       </div>
 
@@ -117,6 +135,78 @@ export function VesselInputPanel({
         />
       </div>
 
+      <div className="input-row">
+        <div className="input-group">
+          <label htmlFor="lsfo">VLSFO $/MT</label>
+          <input
+            id="lsfo"
+            type="number"
+            min="100"
+            step="10"
+            value={inputs.lsfoPriceUSDPerMT}
+            onChange={(event) =>
+              update(
+                'lsfoPriceUSDPerMT',
+                numberOrFallback(event.target.valueAsNumber, inputs.lsfoPriceUSDPerMT),
+              )
+            }
+          />
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="lsmgo">LSMGO $/MT</label>
+          <input
+            id="lsmgo"
+            type="number"
+            min="100"
+            step="10"
+            value={inputs.lsmgoPriceUSDPerMT}
+            onChange={(event) =>
+              update(
+                'lsmgoPriceUSDPerMT',
+                numberOrFallback(event.target.valueAsNumber, inputs.lsmgoPriceUSDPerMT),
+              )
+            }
+          />
+        </div>
+      </div>
+
+      <div className="input-row">
+        <div className="input-group">
+          <label htmlFor="co2-price">CO2 $/MT</label>
+          <input
+            id="co2-price"
+            type="number"
+            min="0"
+            step="5"
+            value={inputs.co2PriceUSDPerMT}
+            onChange={(event) =>
+              update(
+                'co2PriceUSDPerMT',
+                numberOrFallback(event.target.valueAsNumber, inputs.co2PriceUSDPerMT),
+              )
+            }
+          />
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="canal">Canal Dues ($)</label>
+          <input
+            id="canal"
+            type="number"
+            min="0"
+            step="1000"
+            value={inputs.canalDuesUSD}
+            onChange={(event) =>
+              update(
+                'canalDuesUSD',
+                numberOrFallback(event.target.valueAsNumber, inputs.canalDuesUSD),
+              )
+            }
+          />
+        </div>
+      </div>
+
       <div className="input-group">
         <label htmlFor="departure">Departure Date</label>
         <input
@@ -147,7 +237,8 @@ export function VesselInputPanel({
       </button>
 
       <div className="input-note">
-        Demo mode uses sampled route weather and performance physics for instant analysis.
+        Demo mode is stable for judging. Live mode uses Open-Meteo marine and wind
+        APIs without an API key.
       </div>
     </div>
   )

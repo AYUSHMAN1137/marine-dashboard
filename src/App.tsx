@@ -10,7 +10,13 @@ import {
   fetchRouteWeather,
   generateSimulatedWeather,
 } from './services/weatherService'
-import type { DetourResult, VesselInputs, VoyageResult, WeatherPoint } from './types'
+import type {
+  DetourResult,
+  VesselInputs,
+  VoyageResult,
+  WeatherMode,
+  WeatherPoint,
+} from './types'
 import {
   calculateDetourSavings,
   calculateVoyage,
@@ -25,15 +31,63 @@ const DEFAULT_INPUTS: VesselInputs = {
   dwtTons: 50000,
   draftMeters: 12,
   bunkerOnBoardMT: 934,
+  lsfoPriceUSDPerMT: 650,
+  lsmgoPriceUSDPerMT: 850,
+  co2PriceUSDPerMT: 80,
+  canalDuesUSD: 230000,
   departureDateISO: '2026-06-10',
   laycandDateISO: '2026-07-08',
   selectedRoute: 'route2',
 }
 
-const WEATHER_MODE: 'simulated' | 'live' = 'simulated'
+function formatUsd(value: number): string {
+  return `$${Math.round(value).toLocaleString('en-US')}`
+}
+
+function ExecutiveStrip({
+  result,
+  detour,
+  weatherMode,
+}: {
+  result: VoyageResult | null
+  detour: DetourResult | null
+  weatherMode: WeatherMode
+}) {
+  if (!result) return null
+
+  return (
+    <div className="executive-strip" aria-label="Executive voyage summary">
+      <div>
+        <span>Weather Delay</span>
+        <strong>{result.weatherDelayHours.toFixed(0)} hrs</strong>
+      </div>
+      <div>
+        <span>Avg SOG</span>
+        <strong>{result.averageSogKnots.toFixed(1)} kn</strong>
+      </div>
+      <div>
+        <span>Extra Fuel</span>
+        <strong>{result.weatherExtraFuelMT.toFixed(0)} MT</strong>
+      </div>
+      <div>
+        <span>Weather Cost</span>
+        <strong>{formatUsd(result.weatherCostImpactUSD)}</strong>
+      </div>
+      <div>
+        <span>Best Action</span>
+        <strong>{detour?.isWorthTaking ? 'Take detour' : 'Maintain route'}</strong>
+      </div>
+      <div>
+        <span>Data</span>
+        <strong>{weatherMode === 'live' ? 'Live API' : 'Demo model'}</strong>
+      </div>
+    </div>
+  )
+}
 
 export default function App() {
   const [inputs, setInputs] = useState<VesselInputs>(DEFAULT_INPUTS)
+  const [weatherMode, setWeatherMode] = useState<WeatherMode>('simulated')
   const [isLoading, setIsLoading] = useState(false)
   const [loadingProgress, setLoadingProgress] = useState(0)
   const [weatherPoints, setWeatherPoints] = useState<WeatherPoint[]>([])
@@ -46,14 +100,33 @@ export default function App() {
 
   const selectedRoute = ROUTES[inputs.selectedRoute]
 
-  useEffect(() => {
+  const clearAnalysis = useCallback(() => {
     setUseDetour(false)
     setWeatherPoints([])
     setVoyageResult(null)
     setDetourResult(null)
     setDetourWeatherPoints([])
     setDetourVoyageResult(null)
-  }, [inputs.selectedRoute])
+  }, [])
+
+  const handleInputsChange = useCallback(
+    (nextInputs: VesselInputs) => {
+      const routeChanged = nextInputs.selectedRoute !== inputs.selectedRoute
+      setInputs(nextInputs)
+      if (routeChanged) {
+        clearAnalysis()
+      }
+    },
+    [clearAnalysis, inputs.selectedRoute],
+  )
+
+  const handleWeatherModeChange = useCallback(
+    (mode: WeatherMode) => {
+      setWeatherMode(mode)
+      clearAnalysis()
+    },
+    [clearAnalysis],
+  )
 
   const activeWaypoints = useMemo(
     () =>
@@ -78,7 +151,7 @@ export default function App() {
 
   const loadWeather = useCallback(
     async (waypoints: [number, number][]) => {
-      if (WEATHER_MODE === 'live') {
+      if (weatherMode === 'live') {
         return fetchRouteWeather(waypoints, setLoadingProgress)
       }
 
@@ -87,7 +160,7 @@ export default function App() {
       setLoadingProgress(100)
       return simulated
     },
-    [],
+    [weatherMode],
   )
 
   const handleCalculate = useCallback(async () => {
@@ -151,7 +224,9 @@ export default function App() {
         <aside className="sidebar-left">
           <VesselInputPanel
             inputs={inputs}
-            onChange={setInputs}
+            weatherMode={weatherMode}
+            onChange={handleInputsChange}
+            onWeatherModeChange={handleWeatherModeChange}
             onCalculate={handleCalculate}
             isLoading={isLoading}
           />
@@ -172,6 +247,12 @@ export default function App() {
         </aside>
 
         <main className="map-container">
+          <ExecutiveStrip
+            result={activeVoyageResult}
+            detour={detourResult}
+            weatherMode={weatherMode}
+          />
+
           {isLoading && (
             <div className="loading-overlay">
               <div className="loading-spinner" />

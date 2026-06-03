@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import L from 'leaflet'
 import {
+  Circle,
   CircleMarker,
   MapContainer,
   Marker,
@@ -95,8 +96,8 @@ export function VoyageMap({
         zoomControl
       >
         <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
-          attribution="Tiles &copy; Esri"
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         />
 
         <MapFlyTo points={waypoints} />
@@ -133,6 +134,24 @@ export function VoyageMap({
         )}
 
         {weatherPoints.map((weatherPoint, index) => (
+          weatherPoint.isHighRisk ? (
+            <Circle
+              key={`risk-zone-${index}`}
+              center={[weatherPoint.lat, weatherPoint.lng]}
+              radius={160000}
+              pathOptions={{
+                color: '#ff4d4f',
+                fillColor: '#ff4d4f',
+                fillOpacity: 0.08,
+                opacity: 0.32,
+                weight: 1,
+                dashArray: '6 6',
+              }}
+            />
+          ) : null
+        ))}
+
+        {weatherPoints.map((weatherPoint, index) => (
           <CircleMarker
             key={`weather-${index}`}
             center={[weatherPoint.lat, weatherPoint.lng]}
@@ -150,7 +169,10 @@ export function VoyageMap({
                 <div>Wind: {weatherPoint.windSpeedKnots} kn</div>
                 <div>Beaufort: BF {weatherPoint.beaufortScale}</div>
                 <div>Wave Height: {weatherPoint.waveHeightMeters} m</div>
+                <div>Wave Dir: {weatherPoint.waveDirectionDeg} deg</div>
                 <div>Swell Height: {weatherPoint.swellHeightMeters} m</div>
+                <div>Current: {weatherPoint.currentSpeedKnots} kn @ {weatherPoint.currentDirectionDeg} deg</div>
+                <div>Source: {weatherPoint.dataSource}</div>
               </div>
             </Popup>
           </CircleMarker>

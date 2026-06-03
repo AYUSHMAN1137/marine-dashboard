@@ -23,15 +23,17 @@ export function DetourPanel({
       <div className="alert-header">Suggested Detour</div>
 
       <div className="alert-body">
-        <div>8 degree south deviation to bypass the monsoon corridor.</div>
+        <div>Automatic route offset to bypass the active high-risk corridor.</div>
         <div>
           +{Math.round(detour.extraDistanceNm)} nm | +{detour.extraDays.toFixed(1)} days
         </div>
         <div>Gale risk on detour: {detour.galeRiskOnDetour.toFixed(1)}%</div>
         <div>Max BF on detour: BF {detour.maxBeaufortOnDetour}</div>
         <div>Weather cost saving: {formatUsd(detour.weatherCostSavingUSD)}</div>
+        <div>Extra fuel cost: {formatUsd(detour.extraFuelCostUSD)}</div>
         <div className="net-saving">
-          Net impact after fuel delta: {formatUsd(detour.netSavingUSD)}
+          Recommendation: {detour.isWorthTaking ? 'Take detour' : 'Keep main route'} (
+          {formatUsd(detour.netSavingUSD)})
         </div>
       </div>
 

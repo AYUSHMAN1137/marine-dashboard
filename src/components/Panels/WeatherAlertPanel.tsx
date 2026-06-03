@@ -32,6 +32,12 @@ export function WeatherAlertPanel({
         <div>
           Affected waypoints: WP{startWp} to WP{endWp}
         </div>
+        <div>
+          Weather impact: +{result.weatherDelayHours.toFixed(0)} hrs, +{
+            result.weatherExtraFuelMT.toFixed(0)
+          } MT fuel, ${Math.round(result.weatherCostImpactUSD).toLocaleString('en-US')}{' '}
+          estimated cost exposure.
+        </div>
       </div>
 
       {result.laycandMissed && (
