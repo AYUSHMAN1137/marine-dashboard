@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Header } from './components/Header'
 import { VoyageMap } from './components/Map/VoyageMap'
 import { DetourPanel } from './components/Panels/DetourPanel'
@@ -96,7 +96,6 @@ export default function App() {
   const [detourWeatherPoints, setDetourWeatherPoints] = useState<WeatherPoint[]>([])
   const [detourVoyageResult, setDetourVoyageResult] = useState<VoyageResult | null>(null)
   const [useDetour, setUseDetour] = useState(false)
-  const hasAutoCalculated = useRef(false)
 
   const selectedRoute = ROUTES[inputs.selectedRoute]
 
