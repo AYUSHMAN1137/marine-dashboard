@@ -210,11 +210,7 @@ export default function App() {
     ? recommendSpeedAdjustment(activeVoyageResult, inputs.stwKnots)
     : null
 
-  useEffect(() => {
-    if (hasAutoCalculated.current) return
-    hasAutoCalculated.current = true
-    void handleCalculate()
-  }, [handleCalculate])
+  // Removed auto-calculate so it waits for user interaction
 
   return (
     <div className="app">

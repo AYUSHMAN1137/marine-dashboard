@@ -35,6 +35,43 @@ export function ResultsPanel({
       </div>
     )
   }
+import type { VoyageResult } from '../../types'
+
+interface ResultsPanelProps {
+  result: VoyageResult | null
+  routeName: string
+  bunkerOnBoardMT: number
+  laycandDateISO: string
+}
+
+function formatUsd(value: number): string {
+  return `$${Math.round(value).toLocaleString('en-US')}`
+}
+
+function formatMt(value: number): string {
+  return `${Math.round(value).toLocaleString('en-US')} MT`
+}
+
+export function ResultsPanel({
+  result,
+  routeName,
+  bunkerOnBoardMT,
+  laycandDateISO,
+}: ResultsPanelProps) {
+  if (!result) {
+    return (
+      <div className="panel">
+        <div className="panel-title">
+          <span className="dot cyan" />
+          Voyage Results
+        </div>
+        <div className="placeholder-text">
+          Configure vessel details and click Calculate Voyage to see ETA, bunker,
+          cost, and weather risk.
+        </div>
+      </div>
+    )
+  }
 
   const totalBunkerCost = result.ecaFuelCostUSD + result.nonEcaFuelCostUSD
   const bunkerMargin = bunkerOnBoardMT - result.totalFuelMT
@@ -42,7 +79,7 @@ export function ResultsPanel({
   const laycanDate = new Date(laycandDateISO)
 
   return (
-    <div className="panel">
+    <div className="panel animated-results">
       <div className="panel-title">
         <span className="dot cyan" />
         Voyage Results

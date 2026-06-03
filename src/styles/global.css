@@ -730,3 +730,12 @@ select {
     min-height: 560px;
   }
 }
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animated-results {
+  animation: slideInRight 0.5s ease-out forwards;
+}
