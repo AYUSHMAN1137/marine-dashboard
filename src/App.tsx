@@ -210,7 +210,7 @@ export default function App() {
     ? recommendSpeedAdjustment(activeVoyageResult, inputs.stwKnots)
     : null
 
-  // Removed auto-calculate so it waits for user interaction
+
 
   return (
     <div className="app">
